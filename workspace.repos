@@ -1,0 +1,37 @@
+repositories:
+  sura_bringup:
+    type: git
+    url: https://github.com/slopezba/sura_bringup.git
+    version: 781c8a86e8c8877b616d6642c7a3c11dceec1a10
+  sura_cameras:
+    type: git
+    url: https://github.com/slopezba/sura_cameras.git
+    version: 978602dfa1818c286aa02f0dbce0d70c6269681a
+  sura_diagnostics:
+    type: git
+    url: https://github.com/slopezba/sura_diagnostics.git
+    version: 97330f58dc8cd7fb88272042fd07223af0b0737f
+  sura_hardware_interface:
+    type: git
+    url: https://github.com/inesperez03/sura_hardware_interface.git
+    version: 3eca477a0ea1e3e7c37b8ff8e29dca04809f2371
+  sura_localization:
+    type: git
+    url: https://github.com/slopezba/sura_localization.git
+    version: 91d49773bac0cba982bd302ccf595caa0e2e010f
+  sura_msgs:
+    type: git
+    url: https://github.com/inesperez03/sura_msgs.git
+    version: 3bc21a0693432fccd82ef0de2e7e77773af4b754
+  sura_navigator:
+    type: git
+    url: https://github.com/slopezba/sura_navigator.git
+    version: 0e6fea5efaa687acf32c0672cda75a46a439e86b
+  sura_sensors:
+    type: git
+    url: https://github.com/inesperez03/sura_sensors.git
+    version: 0d53c4f9630f054f69f84197327aa3d32a6fbb63
+  sura_teleop:
+    type: git
+    url: https://github.com/slopezba/sura_teleop.git
+    version: 16a53674b025777e5cdf5262940ab90e8bcb2494
