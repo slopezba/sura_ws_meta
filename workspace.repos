@@ -2,7 +2,7 @@ repositories:
   sura_bringup:
     type: git
     url: https://github.com/slopezba/sura_bringup.git
-    version: c14f09fe741cd69a6cc9d16d3c8506a6ecc911c8
+    version: 43054916c789173dc0280f96f871585a086d7701
   sura_cameras:
     type: git
     url: https://github.com/slopezba/sura_cameras.git
@@ -14,7 +14,11 @@ repositories:
   sura_hardware_interface:
     type: git
     url: https://github.com/inesperez03/sura_hardware_interface.git
-    version: 3eca477a0ea1e3e7c37b8ff8e29dca04809f2371
+    version: 093c2546b761aabcee0930ba80dab28e13f061a2
+  sura_imu:
+    type: git
+    url: https://github.com/inesperez03/sura_imu.git
+    version: 6aa1eb027827ec27f43f7c0c5ef1b8e5d79d23ae
   sura_localization:
     type: git
     url: https://github.com/slopezba/sura_localization.git
@@ -30,7 +34,7 @@ repositories:
   sura_sensors:
     type: git
     url: https://github.com/inesperez03/sura_sensors.git
-    version: 0d53c4f9630f054f69f84197327aa3d32a6fbb63
+    version: fd5322d463318dcaaa39aa9ae02cf6574a3088ac
   sura_teleop:
     type: git
     url: https://github.com/slopezba/sura_teleop.git
