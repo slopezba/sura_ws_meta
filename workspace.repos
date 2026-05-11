@@ -1,12 +1,20 @@
 repositories:
+  cirtesub_controllers:
+    type: git
+    url: https://github.com/slopezba/cirtesub_controllers.git
+    version: ros2_humble
+  cirtesu_tank_aruco_localization:
+    type: git
+    url: https://github.com/slopezba/cirtesu_tank_aruco_localization.git
+    version: ros2_humble
   sura_bringup:
     type: git
     url: https://github.com/slopezba/sura_bringup.git
-    version: 43054916c789173dc0280f96f871585a086d7701
+    version: real
   sura_cameras:
     type: git
     url: https://github.com/slopezba/sura_cameras.git
-    version: 978602dfa1818c286aa02f0dbce0d70c6269681a
+    version: real
   sura_diagnostics:
     type: git
     url: https://github.com/slopezba/sura_diagnostics.git
@@ -14,7 +22,7 @@ repositories:
   sura_hardware_interface:
     type: git
     url: https://github.com/inesperez03/sura_hardware_interface.git
-    version: 093c2546b761aabcee0930ba80dab28e13f061a2
+    version: real
   sura_imu:
     type: git
     url: https://github.com/inesperez03/sura_imu.git
