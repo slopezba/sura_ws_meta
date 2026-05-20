@@ -7,6 +7,10 @@ repositories:
     type: git
     url: https://github.com/slopezba/sura_cameras.git
     version: 978602dfa1818c286aa02f0dbce0d70c6269681a
+  sura_controllers:
+    type: git
+    url: https://github.com/slopezba/sura_controllers.git
+    version: 1af91e7dc6d5d95d1b41fd0b679f55af1660cda4
   sura_diagnostics:
     type: git
     url: https://github.com/slopezba/sura_diagnostics.git
