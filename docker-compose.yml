@@ -1,0 +1,28 @@
+name: sura
+
+services:
+  main:
+    image: inesperez03/sura:humble
+
+    network_mode: host
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+    privileged: true
+
+    working_dir: /sura_ws_meta
+
+    volumes:
+      - /dev:/dev
+      - ${SURA_HOME}:/sura_ws_meta
+
+    env_file:
+      - .sura/sura.env
+
+    environment:
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+      TERM: xterm-256color
+      PROMPT_COMMAND: "BRANCH=$(git branch --show-current 2>/dev/null); if [ -n \"$BRANCH\" ]; then PS1='\\[\\e[1;34m\\]SURA\\[\\e[0m\\]:\\[\\e[1;36m\\]\\w\\[\\e[0m\\] \\[\\e[1;33m\\]('$BRANCH')\\[\\e[0m\\] \\[\\e[1;34m\\]\\$ \\[\\e[0m\\]'; else PS1='\\[\\e[1;34m\\]SURA\\[\\e[0m\\]:\\[\\e[1;36m\\]\\w\\[\\e[0m\\] \\[\\e[1;34m\\]\\$ \\[\\e[0m\\]'; fi"
+
+    command: bash -lc "/sura_ws_meta/scripts/sura-entrypoint.sh"
