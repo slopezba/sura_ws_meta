@@ -1,8 +1,8 @@
 .sura/
-install/
+
 build/
+install/
 log/
+
 *.pyc
-__pycache__/*.swp
-*.swo
-*~
+__pycache__/

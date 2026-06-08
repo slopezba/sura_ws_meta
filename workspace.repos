@@ -1,49 +1,60 @@
 repositories:
-  cirtesub_controllers:
+  sura_controllers:
     type: git
-    url: https://github.com/slopezba/cirtesub_controllers.git
-    version: ros2_humble
+    url: https://github.com/slopezba/sura_controllers.git
+    version: general-integration
+
   cirtesu_tank_aruco_localization:
     type: git
     url: https://github.com/slopezba/cirtesu_tank_aruco_localization.git
     version: ros2_humble
+
   sura_bringup:
     type: git
     url: https://github.com/slopezba/sura_bringup.git
-    version: real
+    version: general-inergration
+
   sura_cameras:
     type: git
     url: https://github.com/slopezba/sura_cameras.git
-    version: real
+    version: general-inergration
+
   sura_diagnostics:
     type: git
     url: https://github.com/slopezba/sura_diagnostics.git
-    version: 936e7be397fb7fff65a90603dd0fdf951c602f0f
+    version: general-inergration
+
   sura_hardware_interface:
     type: git
     url: https://github.com/inesperez03/sura_hardware_interface.git
-    version: real
+    version: general-inergration
+
   sura_imu:
     type: git
     url: https://github.com/inesperez03/sura_imu.git
-    version: 6aa1eb027827ec27f43f7c0c5ef1b8e5d79d23ae
+    version: general-inergration
+
   sura_localization:
     type: git
     url: https://github.com/slopezba/sura_localization.git
-    version: 61d68d077059963ed83498b88a25b19bbb224d4a
+    version: general-inergration
+
   sura_msgs:
     type: git
     url: https://github.com/inesperez03/sura_msgs.git
-    version: 3bc21a0693432fccd82ef0de2e7e77773af4b754
+    version: main
+
   sura_navigator:
     type: git
     url: https://github.com/slopezba/sura_navigator.git
-    version: bf829b23e9b68ee52c7e4feef62b84b41f0bd3d9
+    version: general-inergration
+
   sura_sensors:
     type: git
     url: https://github.com/inesperez03/sura_sensors.git
-    version: fd5322d463318dcaaa39aa9ae02cf6574a3088ac
+    version: general-inergration
+
   sura_teleop:
     type: git
     url: https://github.com/slopezba/sura_teleop.git
-    version: 2d4f3f7a3cd2ce9f8bccfaae52aa816c173b29a2
+    version: main
