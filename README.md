@@ -150,7 +150,7 @@ From the workspace root:
 
 ```bash
 mkdir -p src
-vcs import src < sura_ws_meta/workspace.repos
+vcs import src < workspace.repos
 ```
 
 ## Build 🔧
