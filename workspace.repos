@@ -2,7 +2,7 @@ repositories:
   sura_controllers:
     type: git
     url: https://github.com/slopezba/sura_controllers.git
-    version: general-integration
+    version: general-inergration
 
   cirtesu_tank_aruco_localization:
     type: git
