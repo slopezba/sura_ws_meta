@@ -1,0 +1,420 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+APP_NAME="SURA"
+CONFIG_DIR_NAME=".sura"
+CONFIG_FILE_NAME="sura.env"
+COMPOSE_FILE_NAME="docker-compose.yml"
+
+print_header() {
+  echo "============================================================"
+  echo " $APP_NAME Robot Runtime"
+  echo "============================================================"
+}
+
+print_error() {
+  echo "Error: $*" >&2
+}
+
+resolve_sura_home() {
+  local source_path="${BASH_SOURCE[0]}"
+
+  while [ -L "$source_path" ]; do
+    local dir
+    dir="$(cd -P "$(dirname "$source_path")" >/dev/null 2>&1 && pwd)"
+    source_path="$(readlink "$source_path")"
+    [[ "$source_path" != /* ]] && source_path="$dir/$source_path"
+  done
+
+  local script_dir
+  script_dir="$(cd -P "$(dirname "$source_path")" >/dev/null 2>&1 && pwd)"
+
+  cd "$script_dir/.." >/dev/null 2>&1
+  pwd
+}
+
+SURA_HOME="$(resolve_sura_home)"
+CONFIG_DIR="$SURA_HOME/$CONFIG_DIR_NAME"
+CONFIG_FILE="$CONFIG_DIR/$CONFIG_FILE_NAME"
+COMPOSE_FILE="$SURA_HOME/$COMPOSE_FILE_NAME"
+
+export SURA_HOME
+
+compose() {
+  cd "$SURA_HOME"
+  docker compose \
+    --project-directory "$SURA_HOME" \
+    -f "$COMPOSE_FILE" \
+    "$@"
+}
+
+require_workspace() {
+  if [ ! -f "$COMPOSE_FILE" ]; then
+    print_error "docker-compose.yml was not found in $SURA_HOME"
+    exit 1
+  fi
+}
+
+require_docker() {
+  if ! command -v docker >/dev/null 2>&1; then
+    print_error "Docker is not installed or not available in PATH."
+    exit 1
+  fi
+
+  if ! docker compose version >/dev/null 2>&1; then
+    print_error "Docker Compose plugin is not available."
+    exit 1
+  fi
+}
+
+validate_robot_name() {
+  local value="$1"
+  [[ "$value" =~ ^[a-zA-Z][a-zA-Z0-9_-]*$ ]]
+}
+
+validate_ros_domain_id() {
+  local value="$1"
+  [[ "$value" =~ ^[0-9]+$ ]] && [ "$value" -ge 0 ] && [ "$value" -le 101 ]
+}
+
+select_dds() {
+  local choice
+
+  echo
+  echo "Select DDS middleware:"
+  echo "  1) CycloneDDS"
+  echo "  2) FastDDS"
+  echo
+
+  while true; do
+    read -rp "Choice [1/2]: " choice
+
+    case "$choice" in
+      1)
+        SURA_DDS="cyclonedds"
+        RMW_IMPLEMENTATION="rmw_cyclonedds_cpp"
+        return
+        ;;
+      2)
+        SURA_DDS="fastdds"
+        RMW_IMPLEMENTATION="rmw_fastrtps_cpp"
+        return
+        ;;
+      *)
+        echo "Invalid option. Please choose 1 or 2."
+        ;;
+    esac
+  done
+}
+
+configure_runtime() {
+  local robot_name
+  local ros_domain_id
+
+  mkdir -p "$CONFIG_DIR"
+
+  print_header
+  echo "Initial runtime configuration"
+  echo
+
+  while true; do
+    read -rp "Robot name, e.g. blueboat_01: " robot_name
+
+    if validate_robot_name "$robot_name"; then
+      break
+    fi
+
+    echo "Invalid robot name."
+    echo "Use letters, numbers, hyphens or underscores. The name must start with a letter."
+    echo
+  done
+
+  while true; do
+    read -rp "ROS_DOMAIN_ID [0-101], e.g. 23: " ros_domain_id
+
+    if validate_ros_domain_id "$ros_domain_id"; then
+      break
+    fi
+
+    echo "Invalid ROS_DOMAIN_ID. Please use a number between 0 and 101."
+    echo
+  done
+
+  select_dds
+
+  local robot_namespace="/$robot_name"
+
+  cat > "$CONFIG_FILE" <<EOF
+SURA_ROBOT_NAME=$robot_name
+SURA_ROBOT_NAMESPACE=$robot_namespace
+ROS_DOMAIN_ID=$ros_domain_id
+SURA_DDS=$SURA_DDS
+RMW_IMPLEMENTATION=$RMW_IMPLEMENTATION
+EOF
+
+  echo
+  echo "Configuration saved:"
+  echo "  $CONFIG_FILE"
+  echo
+}
+
+ensure_config_exists() {
+  if [ ! -f "$CONFIG_FILE" ]; then
+    configure_runtime
+  fi
+}
+
+start_runtime() {
+  require_workspace
+  require_docker
+  ensure_config_exists
+
+  echo "Starting SURA Docker runtime..."
+  echo "Workspace: $SURA_HOME"
+  echo
+
+  compose up -d
+
+  echo
+  echo "SURA Docker runtime is running."
+  echo
+  echo "To open an interactive terminal inside the container, run:"
+  echo "  sura shell"
+}
+
+stop_runtime() {
+  require_workspace
+  require_docker
+
+  echo "Stopping SURA Docker runtime..."
+  echo "Workspace: $SURA_HOME"
+  echo
+
+  compose down
+
+  if [ -f "$CONFIG_FILE" ]; then
+    rm -f "$CONFIG_FILE"
+    echo
+    echo "Runtime configuration has been cleared."
+    echo "The next 'sura start' will ask for robot name, ROS_DOMAIN_ID and DDS middleware."
+  fi
+
+  echo
+  echo "SURA Docker runtime has been stopped."
+}
+
+restart_runtime() {
+  require_workspace
+  require_docker
+  ensure_config_exists
+
+  echo "Restarting SURA Docker runtime..."
+  echo
+
+  compose down
+  compose up -d
+
+  echo
+  echo "SURA Docker runtime has been restarted."
+}
+
+open_shell() {
+  require_workspace
+  require_docker
+  ensure_config_exists
+
+  compose exec main bash -lc '
+    ulimit -c 0
+
+    source /opt/ros/humble/setup.bash
+
+    if [ -f /sura_ws_meta/install/setup.bash ]; then
+      source /sura_ws_meta/install/setup.bash
+    fi
+
+    set -a
+    source /sura_ws_meta/.sura/sura.env
+    set +a
+
+    cd /sura_ws_meta
+
+    export PROMPT_COMMAND='\''PS1="\[\e[1;34m\]${SURA_ROBOT_NAME:-SURA}\[\e[0m\]:\[\e[1;36m\]\w\[\e[0m\] # "'\''
+
+    echo "============================================================"
+    echo " SURA Docker Shell"
+    echo "============================================================"
+    echo " Workspace         : /sura_ws_meta"
+    echo " Robot name        : ${SURA_ROBOT_NAME}"
+    echo " Robot namespace   : ${SURA_ROBOT_NAMESPACE}"
+    echo " ROS_DOMAIN_ID     : ${ROS_DOMAIN_ID}"
+    echo " DDS middleware    : ${SURA_DDS}"
+    echo " RMW implementation: ${RMW_IMPLEMENTATION}"
+    echo "============================================================"
+    echo
+
+    rcfile="/tmp/sura-shell-rc.$$"
+    {
+      printf "%s\n" "ulimit -c 0"
+      printf "%s\n" "source /opt/ros/humble/setup.bash"
+      printf "%s\n" "[ -f /sura_ws_meta/install/setup.bash ] && source /sura_ws_meta/install/setup.bash"
+      printf "%s\n" "set -a"
+      printf "%s\n" "source /sura_ws_meta/.sura/sura.env"
+      printf "%s\n" "set +a"
+      printf "%s\n" "cd /sura_ws_meta"
+      printf "%s\n" "__sura_prompt() { PS1=\"\[\e[1;34m\]\${SURA_ROBOT_NAME:-SURA}\[\e[0m\]:\[\e[1;36m\]\w\[\e[0m\] # \"; }"
+      printf "%s\n" "PROMPT_COMMAND=__sura_prompt"
+    } > "$rcfile"
+
+    exec bash --noprofile --rcfile "$rcfile" -i
+  '
+}
+
+show_config() {
+  if [ ! -f "$CONFIG_FILE" ]; then
+    echo "SURA is not configured yet."
+    echo
+    echo "Run:"
+    echo "  sura setup"
+    return
+  fi
+
+  cat "$CONFIG_FILE"
+}
+
+run_doctor() {
+  print_header
+  echo "System check"
+  echo
+
+  echo "Workspace:"
+  echo "  $SURA_HOME"
+  echo
+
+  if [ -f "$COMPOSE_FILE" ]; then
+    echo "[OK] docker-compose.yml found"
+  else
+    echo "[FAIL] docker-compose.yml not found"
+  fi
+
+  if [ -f "$CONFIG_FILE" ]; then
+    echo "[OK] runtime configuration found"
+  else
+    echo "[WARN] runtime configuration not found"
+  fi
+
+  if command -v docker >/dev/null 2>&1; then
+    echo "[OK] Docker command found"
+  else
+    echo "[FAIL] Docker command not found"
+  fi
+
+  if docker compose version >/dev/null 2>&1; then
+    echo "[OK] Docker Compose plugin found"
+  else
+    echo "[FAIL] Docker Compose plugin not found"
+  fi
+
+  echo
+}
+
+print_help() {
+  cat <<EOF
+SURA Robot Runtime
+
+Usage:
+  sura <command>
+
+Commands:
+  setup          Configure robot name, ROS_DOMAIN_ID and DDS middleware
+  start          Start the SURA Docker runtime
+  stop           Stop and remove the SURA Docker runtime
+  restart        Restart the SURA Docker runtime
+  status         Show Docker Compose service status
+  logs           Follow runtime logs
+  shell          Open an interactive shell inside the main container
+  config         Show current runtime configuration
+  reconfigure    Reconfigure robot name, ROS_DOMAIN_ID and DDS middleware
+  doctor         Check workspace, Docker and configuration
+  home           Print the SURA workspace path
+  help           Show this help message
+
+Examples:
+  sura setup
+  sura start
+  sura shell
+  sura stop
+EOF
+}
+
+main() {
+  local command="${1:-help}"
+
+  case "$command" in
+    setup)
+      require_workspace
+      configure_runtime
+      ;;
+
+    start)
+      start_runtime
+      ;;
+
+    stop)
+      stop_runtime
+      ;;
+
+    restart)
+      restart_runtime
+      ;;
+
+    status)
+      require_workspace
+      require_docker
+      ensure_config_exists
+      compose ps
+      ;;
+
+    logs)
+      require_workspace
+      require_docker
+      ensure_config_exists
+      compose logs -f --tail=100
+      ;;
+
+    shell)
+      open_shell
+      ;;
+
+    config)
+      show_config
+      ;;
+
+    reconfigure)
+      require_workspace
+      require_docker
+      configure_runtime
+      restart_runtime
+      ;;
+
+    doctor)
+      run_doctor
+      ;;
+
+    home)
+      echo "$SURA_HOME"
+      ;;
+
+    help|--help|-h)
+      print_help
+      ;;
+
+    *)
+      print_error "Unknown command: $command"
+      echo
+      print_help
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"

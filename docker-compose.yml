@@ -1,0 +1,33 @@
+name: sura
+
+services:
+  main:
+    image: inesperez03/sura:humble
+
+    network_mode: host
+    ipc: host
+
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+    privileged: true
+
+    ulimits:
+      core: 0
+
+    working_dir: /sura_ws_meta
+
+    volumes:
+      - /dev:/dev
+      - ${SURA_HOME}:/sura_ws_meta
+
+    env_file:
+      - .sura/sura.env
+
+    environment:
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+      TERM: xterm-256color
+      PROMPT_COMMAND: 'PS1="\[\e[1;34m\]$${SURA_ROBOT_NAME:-SURA}\[\e[0m\]:\[\e[1;36m\]\w\[\e[0m\] # "'
+
+    command: bash -lc "ulimit -c 0 && sleep infinity"

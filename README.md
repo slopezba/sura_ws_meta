@@ -83,20 +83,53 @@ only stores the manifest required to recreate a known workspace composition.
 The intended onboard setup starts with a Raspberry Pi and a microSD card,
 preferably **128 GB**. The card should contain a Raspberry Pi OS/Raspbian-based
 system prepared for the robot. Once the board boots, the complete SURA runtime
-is expected to run inside Docker on the robot.
+runs inside Docker on the robot.
 
-A typical setup flow is:
+From the robot, clone this workspace and install the `sura` command:
 
-1. Prepare a 128 GB microSD card with Raspberry Pi OS or the required
-   Raspbian-based image.
-2. Assemble the Raspberry Pi with the Blue Robotics Navigator board.
-3. Configure networking so the robot can be reached from the operator station.
-4. Install or load the Docker image that contains the ROS 2 Humble SURA stack.
-5. Start the container on the robot with access to the required hardware
-   devices, network interfaces, and configuration files.
-6. Launch the vehicle bringup through `sura_bringup`.
-7. Check sensors, actuators, diagnostics, and teleoperation before going near
-   water, because optimism is not a safety protocol.
+```bash
+git clone <SURA_WS_META_REPOSITORY_URL> sura_ws_meta
+cd sura_ws_meta
+./install.sh
+```
+
+Start the Docker runtime:
+
+```bash
+sura start
+```
+
+On the first run, the command asks for:
+
+- Robot name.
+- `ROS_DOMAIN_ID`.
+- DDS middleware: `CycloneDDS` or `FastDDS`.
+
+The container is started with the workspace mounted at `/sura_ws_meta`, access to
+the robot devices, host networking, and host IPC. It does not launch any ROS 2
+package automatically.
+
+To open an interactive terminal inside the container, run:
+
+```bash
+sura shell
+```
+
+To stop and remove the Docker runtime, run:
+
+```bash
+sura stop
+```
+
+Useful commands:
+
+```bash
+sura status
+sura logs
+sura config
+sura reconfigure
+sura doctor
+```
 
 ## Simulation 🧪
 
@@ -120,7 +153,7 @@ From the workspace root:
 
 ```bash
 mkdir -p src
-vcs import src < sura_ws_meta/workspace.repos
+vcs import src < workspace.repos
 ```
 
 ## Build 🔧
