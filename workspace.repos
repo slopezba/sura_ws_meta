@@ -2,7 +2,7 @@ repositories:
   sura_controllers:
     type: git
     url: https://github.com/slopezba/sura_controllers.git
-    version: general-inergration
+    version: main
 
   cirtesu_tank_aruco_localization:
     type: git
@@ -12,32 +12,32 @@ repositories:
   sura_bringup:
     type: git
     url: https://github.com/slopezba/sura_bringup.git
-    version: general-inergration
+    version: main
 
   sura_cameras:
     type: git
     url: https://github.com/slopezba/sura_cameras.git
-    version: general-inergration
+    version: main
 
   sura_diagnostics:
     type: git
     url: https://github.com/slopezba/sura_diagnostics.git
-    version: general-inergration
+    version: main
 
   sura_hardware_interface:
     type: git
     url: https://github.com/inesperez03/sura_hardware_interface.git
-    version: general-inergration
+    version: main
 
   sura_imu:
     type: git
     url: https://github.com/inesperez03/sura_imu.git
-    version: general-inergration
+    version: main
 
   sura_localization:
     type: git
     url: https://github.com/slopezba/sura_localization.git
-    version: general-inergration
+    version: main
 
   sura_msgs:
     type: git
@@ -47,12 +47,12 @@ repositories:
   sura_navigator:
     type: git
     url: https://github.com/slopezba/sura_navigator.git
-    version: general-inergration
+    version: main
 
   sura_sensors:
     type: git
     url: https://github.com/inesperez03/sura_sensors.git
-    version: general-inergration
+    version: main
 
   sura_teleop:
     type: git
