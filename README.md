@@ -60,6 +60,9 @@ only stores the manifest required to recreate a known workspace composition.
   rest of the architecture.
 - [`sura_cameras`](https://github.com/slopezba/sura_cameras): launch files and
   image-processing pipelines for cameras, visual perception, and related flows.
+- [`sura_controllers`](https://github.com/slopezba/sura_controllers): ROS 2
+  Control controller plugins shared by the SURA AUV and USV stacks, including
+  common thruster allocation, AUV controllers, and USV controllers.
 - [`sura_imu`](../sura_imu): IMU processing and attitude-estimation package. It
   is present in this workspace as a local package, but it is not currently a Git
   repository, so it cannot be pinned in `workspace.repos`.
