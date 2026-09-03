@@ -1,0 +1,92 @@
+.wy-side-nav-search {
+  background: #14769c;
+}
+
+.wy-nav-top {
+  background: #14769c;
+}
+
+.wy-side-nav-search .logo {
+  max-width: 96px;
+  width: 42%;
+  margin: 0 auto;
+}
+
+.wy-side-nav-search > a {
+  display: block;
+}
+
+.bringup-flow {
+  display: block;
+  height: auto;
+  margin: 1.25rem 0 1.75rem;
+  max-width: 100%;
+}
+
+.bringup-flow .box {
+  fill: #f8fafc;
+  stroke: #2f3b45;
+  stroke-width: 1.2;
+}
+
+.bringup-flow .box.source {
+  fill: #eef6f8;
+}
+
+.bringup-flow .box.config {
+  fill: #f7fbfc;
+  stroke: #6f8fa0;
+  stroke-width: 1.2;
+}
+
+.bringup-flow .box.primary {
+  fill: #d6edf3;
+  stroke: #14769c;
+  stroke-width: 2;
+}
+
+.bringup-flow .box.variable {
+  fill: transparent;
+  stroke: #9aabb8;
+  stroke-dasharray: 5 4;
+  stroke-width: 1;
+}
+
+.bringup-flow .namespace {
+  fill: #fbfdff;
+  stroke: #b8c6d1;
+  stroke-width: 1.3;
+}
+
+.bringup-flow .line {
+  fill: none;
+  stroke: #5f7280;
+  stroke-width: 1.2;
+}
+
+.bringup-flow text {
+  fill: #101820;
+  font-family: Inter, Helvetica, Arial, sans-serif;
+  font-size: 14px;
+}
+
+.bringup-flow .primary-label {
+  fill: #0f4f69;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.bringup-flow .variable-label {
+  fill: #5f7280;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+}
+
+.bringup-flow .small-label {
+  fill: #5f7280;
+  font-size: 12px;
+}
+
+.bringup-flow a {
+  text-decoration: none;
+}

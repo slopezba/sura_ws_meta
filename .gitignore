@@ -6,3 +6,7 @@ log/
 
 *.pyc
 __pycache__/
+
+docs/.venv/
+docs/.deps/
+docs/_build/
