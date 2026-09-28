@@ -137,10 +137,9 @@ Surface vehicles use fewer motion axes than an AUV, but they can still use
 several control modes.
 
 There is currently no dedicated USV or BlueBoat teleop YAML in
-``sura_teleop``. The launch only selects ``teleop_params_bluerov.yaml`` when the
-namespace contains ``bluerov``; otherwise it selects one of the CIRTESUB YAML
-profiles. For a USV, create a custom teleop YAML or wrapper launch that maps the
-joystick actions to the controllers loaded by the surface robot.
+``sura_teleop``. For a USV, add a YAML file following the package naming
+convention and map the joystick actions to the controllers loaded by the
+surface robot.
 
 .. list-table::
    :header-rows: 1
@@ -175,26 +174,44 @@ torque commands directly to the low-level controller.
 Configuration YAML
 ------------------
 
-``teleop.launch.py`` selects a YAML profile automatically:
+``teleop.launch.py`` uses ``environment`` from the launch arguments when it is
+passed explicitly. If ``environment`` is empty, it reads ``robot.environment``
+from:
 
-``teleop_params_bluerov.yaml``
-   Used when ``robot_namespace`` contains ``bluerov``. This selection is done
-   in ``teleop.launch.py`` by checking the namespace string; it is not defined
-   inside the YAML itself. For example, ``robot_namespace:=bluerov`` or
-   ``robot_namespace:=my_bluerov`` selects this file.
+.. code-block:: text
+
+   <robot_namespace>_description/config/bringup_description.yaml
+
+Then it loads the matching YAML profile:
+
+.. code-block:: text
+
+   teleop_params_<robot_namespace>_<environment>.yaml
+
+For example:
 
 ``teleop_params_cirtesub_sim.yaml``
-   Used for non-BlueROV robots when ``teleop:=sim``.
+   Used when launching with ``robot_namespace:=cirtesub environment:=sim`` or
+   with ``robot.environment: sim`` in ``cirtesub_description``.
 
 ``teleop_params_cirtesub_real.yaml``
-   Used for non-BlueROV robots when ``teleop:=real``.
+   Used when launching with ``robot_namespace:=cirtesub environment:=real`` or
+   with ``robot.environment: real`` in ``cirtesub_description``.
 
-Before the node starts, topics written as ``/sura/...`` are rewritten to
-``/<robot_namespace>/...``.
+``teleop_params_bluerov_sim.yaml``
+   Used when launching with ``robot_namespace:=bluerov environment:=sim`` or
+   with ``robot.environment: sim`` in ``bluerov_description``.
 
-BlueBoat is not selected automatically by the current launch logic. If the
-robot is a BlueBoat or another USV, provide a custom teleop YAML from a wrapper
-launch instead of relying on the BlueROV namespace rule.
+``teleop_params_bluerov_real.yaml``
+   Used when launching with ``robot_namespace:=bluerov environment:=real`` or
+   with ``robot.environment: real`` in ``bluerov_description``.
+
+If the exact YAML file does not exist, the launch fails with an error. There is
+no fallback based on robot type or namespace contents.
+
+Topic names are read from the selected YAML as written. The launch only adapts
+the YAML node key so the parameters apply to
+``/<robot_namespace>/sura_teleop``.
 
 The most useful parameters to edit are:
 

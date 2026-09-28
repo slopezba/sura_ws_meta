@@ -272,6 +272,12 @@ launch teleoperation:
      robot_namespace:=<robot_namespace> \
      teleop_enabled:=true
 
+It reads ``<robot_namespace>_description/config/bringup_description.yaml`` to
+select the robot description and environment. RViz uses
+``<robot_namespace>_description/config/<robot_namespace>.rviz`` when that file
+exists, otherwise it falls back to ``sura_bringup/config/sura.rviz``. MoveIt
+configuration is loaded only when the robot description package provides it.
+
 
 .. note::
 

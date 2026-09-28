@@ -1,25 +1,32 @@
 Simulation
 ==========
 
-SURA is designed to run onboard real robots, but the same architecture can also
-be used with different simulation environments. To make this easier, SURA
-provides a Docker-based setup that packages the simulator dependencies and keeps
-the host system clean.
+SURA can also be used with `Stonefish <https://stonefish.readthedocs.io/en/latest/>`_
+to test the robot in simulation before running it on real hardware.
 
-The first supported example uses `Stonefish <https://stonefish.readthedocs.io/en/latest/>`_,
-an advanced simulation tool developed for marine robotics. Stonefish was chosen
-because it combines physics simulation with realistic marine and underwater
-rendering, includes hydrodynamics based on body geometry, and can be integrated
-with ROS through ``stonefish_ros``.
+This setup uses Docker and requires a computer with an NVIDIA GPU and the NVIDIA
+container runtime installed.
 
-This simulation setup requires a GPU. The Docker Compose configuration below is
-prepared for NVIDIA GPUs and expects the host to have the NVIDIA container
-runtime available.
+Create a Simulation Folder
+--------------------------
+
+First create a folder for the simulation files and enter it:
+
+.. code-block:: bash
+
+   mkdir -p sura_simulation
+   cd sura_simulation
 
 Create the Docker Compose File
 ------------------------------
 
-Create a ``docker-compose.yml`` file with the following content:
+Create the ``docker-compose.yml`` file inside the ``sura_simulation`` folder:
+
+.. code-block:: bash
+
+   nano docker-compose.yml
+
+Paste this content:
 
 .. code-block:: yaml
 
@@ -39,8 +46,8 @@ Create a ``docker-compose.yml`` file with the following content:
          DISPLAY: ${DISPLAY}
          XDG_RUNTIME_DIR: /tmp/runtime-root
          SDL_VIDEODRIVER: x11
-         ROS_DOMAIN_ID: <SURA_ROS_DOMAIN_ID>
-         RMW_IMPLEMENTATION: <SURA_RMW_IMPLEMENTATION>
+         ROS_DOMAIN_ID: 4
+         RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
 
        volumes:
          - /tmp/.X11-unix:/tmp/.X11-unix:rw
@@ -57,42 +64,141 @@ Create a ``docker-compose.yml`` file with the following content:
                  count: all
                  capabilities: [gpu]
 
-       command: sleep infinity
+       command: >
+         bash -lc "
+           if [ ! -d /root/sura_ws_meta ]; then
+             git clone https://github.com/slopezba/sura_ws_meta.git /root/sura_ws_meta &&
+             cd /root/sura_ws_meta &&
+             source /opt/ros/humble/setup.bash &&
+             mkdir -p src &&
+             vcs import src < workspace.repos &&
+             colcon build
+           fi &&
+           sleep infinity
+         "
 
-.. note::
+This example uses ``ROS_DOMAIN_ID=4`` and Cyclone DDS:
 
-   Replace ``<SURA_ROS_DOMAIN_ID>`` with the ``ROS_DOMAIN_ID`` selected when
-   configuring SURA. Replace ``<SURA_RMW_IMPLEMENTATION>`` with the DDS
-   middleware selected for SURA, for example ``rmw_cyclonedds_cpp`` when using
-   CycloneDDS or ``rmw_fastrtps_cpp`` when using FastDDS.
+.. code-block:: yaml
+
+   ROS_DOMAIN_ID: 4
+   RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
 
 Start the Container
 -------------------
 
-Allow the container to access the graphical display:
+Allow Docker to open graphical windows:
 
 .. code-block:: bash
 
    xhost +si:localuser:root
 
-Start the simulation container:
+Start the container:
 
 .. code-block:: bash
 
    docker compose up -d
 
-Open a terminal inside the container:
+Check that it is running:
+
+.. code-block:: bash
+
+   docker ps
+
+Open Terminals Inside Docker
+----------------------------
+
+Open three different terminals on the host. In each one, enter the container:
 
 .. code-block:: bash
 
    docker exec -it sura_stonefish bash
 
-Launch an Example Simulation
-----------------------------
+Terminal 1: Launch the Simulation
+---------------------------------
 
-Inside the container, launch the BlueROV Stonefish example:
+Inside the first Docker terminal, prepare the environment:
 
 .. code-block:: bash
 
-   cd stonefish_environments
+   cd /root/sura_ws_meta
+   source /opt/ros/humble/setup.bash
+   source install/setup.bash
+
+Then launch one simulation. Use only one of these commands:
+
+.. code-block:: bash
+
    ros2 launch bluerov_stonefish bluerov_cirtesu.launch.py
+
+.. image:: _static/bluerov_stonefish.png
+   :alt: BlueROV Stonefish simulation
+   :width: 420px
+
+.. code-block:: bash
+
+   ros2 launch cirtesub_stonefish cirtesub_cirtesu.launch.py
+
+.. image:: _static/cirtesub_stonefish.png
+   :alt: CIRTESUB Stonefish simulation
+   :width: 420px
+
+.. code-block:: bash
+
+   ros2 launch blueboat_stonefish blueboat_cirtesu.launch.py
+
+.. image:: _static/blueboat_stonefish.png
+   :alt: BlueBoat Stonefish simulation
+   :width: 420px
+
+.. code-block:: bash
+
+   ros2 launch catamaran_stonefish catamaran_cirtesu.launch.py
+
+.. image:: _static/catamaran_stonefish.png
+   :alt: Catamaran Stonefish simulation
+   :width: 420px
+
+Terminal 2: Launch SURA
+-----------------------
+
+Inside the second Docker terminal, launch SURA. Replace ``robot_name`` with the
+namespace for the robot that is running in Stonefish:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Simulation
+     - ``robot_name``
+   * - BlueROV
+     - ``bluerov``
+   * - CIRTESUB
+     - ``cirtesub``
+   * - BlueBoat
+     - ``blueboat``
+   * - Catamaran
+     - ``catamaran``
+
+.. code-block:: bash
+
+   cd /root/sura_ws_meta
+   source /opt/ros/humble/setup.bash
+   source install/setup.bash
+   ros2 launch sura_bringup sura_bringup.launch.py robot_namespace:=robot_name
+
+Terminal 3: Launch Teleoperation
+--------------------------------
+
+Inside the third Docker terminal, launch the ground control station. This starts
+RViz and the joystick teleoperation tools from :doc:`packages/sura_teleop`:
+
+.. code-block:: bash
+
+   cd /root/sura_ws_meta
+   source /opt/ros/humble/setup.bash
+   source install/setup.bash
+   ros2 launch sura_bringup sura_gcs.launch.py robot_namespace:=robot_name
+
+.. image:: _static/rviz_teleoperation.png
+   :alt: RViz ground control station for SURA teleoperation
+   :width: 520px

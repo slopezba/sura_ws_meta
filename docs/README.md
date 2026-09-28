@@ -3,9 +3,9 @@
 Estructura base de documentacion con Sphinx y el tema Read the Docs.
 
 La navegacion usa secciones comunes para documentacion tecnica: overview,
-installation, architecture, packages, robot setup, simulation, workspace, build,
-development, changelog y license. De momento el contenido es una primera version
-breve basada en el README del proyecto.
+installation, architecture, packages, robot setup, simulation, development,
+changelog y license. De momento el contenido es una primera version breve basada
+en el README del proyecto.
 
 ## Construccion local sin venv
 
@@ -14,6 +14,7 @@ Git:
 
 ```bash
 python3 -m pip install --target docs/.deps/python -r docs/requirements.txt
+rm -rf docs/_build/html
 PYTHONPATH=docs/.deps/python python3 -m sphinx -b html docs docs/_build/html
 python3 -m http.server 8000 --directory docs/_build/html
 ```
